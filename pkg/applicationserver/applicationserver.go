@@ -290,7 +290,7 @@ func (as *ApplicationServer) processUp(ctx context.Context, up *ttnpb.Applicatio
 		return nil
 	}
 
-	if err := as.publishUp(ctx, up); err != nil {
+	if err := as.publishUp(as.FromRequestContext(ctx), up); err != nil {
 		log.FromContext(ctx).WithError(err).Warn("Failed to broadcast upstream message")
 		registerDropUp(ctx, up, err)
 		return nil
