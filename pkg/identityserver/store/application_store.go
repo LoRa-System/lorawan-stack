@@ -154,3 +154,22 @@ func (s *applicationStore) DeleteApplication(ctx context.Context, id *ttnpb.Appl
 	defer trace.StartRegion(ctx, "delete application").End()
 	return s.deleteEntity(ctx, id)
 }
+
+func (s *applicationStore) PurgeApplication(ctx context.Context, id *ttnpb.ApplicationIdentifiers) error {
+	defer trace.StartRegion(ctx, "purge application").End()
+	query := s.query(ctx, Application{}, withUnscoped(), withApplicationID(id.GetApplicationID()))
+	query = selectApplicationFields(ctx, query, nil)
+	var appModel Application
+	if err := query.First(&appModel).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return errNotFoundForID(id)
+		}
+		return err
+	}
+	// delete application attributes before purging
+	var emptyAttributes []Attribute
+	if err := s.replaceAttributes(ctx, "gateway", appModel.ID, appModel.Attributes, emptyAttributes); err != nil {
+		return err
+	}
+	return s.purgeEntity(ctx, id)
+}
