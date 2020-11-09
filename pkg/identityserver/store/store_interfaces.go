@@ -31,6 +31,7 @@ type ApplicationStore interface {
 	GetApplication(ctx context.Context, id *ttnpb.ApplicationIdentifiers, fieldMask *types.FieldMask) (*ttnpb.Application, error)
 	UpdateApplication(ctx context.Context, app *ttnpb.Application, fieldMask *types.FieldMask) (*ttnpb.Application, error)
 	DeleteApplication(ctx context.Context, id *ttnpb.ApplicationIdentifiers) error
+	PurgeApplication(ctx context.Context, id *ttnpb.ApplicationIdentifiers) error
 }
 
 // ClientStore interface for storing Clients.
@@ -69,6 +70,7 @@ type GatewayStore interface {
 	GetGateway(ctx context.Context, id *ttnpb.GatewayIdentifiers, fieldMask *types.FieldMask) (*ttnpb.Gateway, error)
 	UpdateGateway(ctx context.Context, gtw *ttnpb.Gateway, fieldMask *types.FieldMask) (*ttnpb.Gateway, error)
 	DeleteGateway(ctx context.Context, id *ttnpb.GatewayIdentifiers) error
+	PurgeGateway(ctx context.Context, id *ttnpb.GatewayIdentifiers) error
 }
 
 // OrganizationStore interface for storing Organizations.
@@ -94,6 +96,7 @@ type UserStore interface {
 	GetUser(ctx context.Context, id *ttnpb.UserIdentifiers, fieldMask *types.FieldMask) (*ttnpb.User, error)
 	UpdateUser(ctx context.Context, usr *ttnpb.User, fieldMask *types.FieldMask) (*ttnpb.User, error)
 	DeleteUser(ctx context.Context, id *ttnpb.UserIdentifiers) error
+	PurgeUser(ctx context.Context, id *ttnpb.UserIdentifiers) error
 }
 
 // UserSessionStore interface for storing User sessions.
@@ -126,6 +129,8 @@ type MembershipStore interface {
 	GetMember(ctx context.Context, id *ttnpb.OrganizationOrUserIdentifiers, entityID ttnpb.Identifiers) (*ttnpb.Rights, error)
 	// Set direct member rights on an entity. Rights can be deleted by not passing any rights.
 	SetMember(ctx context.Context, id *ttnpb.OrganizationOrUserIdentifiers, entityID ttnpb.Identifiers, rights *ttnpb.Rights) error
+	// Delete all member rights on an entity. Used for purging entities.
+	DeleteEntityMembers(ctx context.Context, entityID ttnpb.Identifiers) error
 }
 
 // APIKeyStore interface for storing API keys for entities (applications,
@@ -139,6 +144,8 @@ type APIKeyStore interface {
 	GetAPIKey(ctx context.Context, id string) (ttnpb.Identifiers, *ttnpb.APIKey, error)
 	// Update key rights on an entity. Rights can be deleted by not passing any rights, in which case the returned API key will be nil.
 	UpdateAPIKey(ctx context.Context, entityID ttnpb.Identifiers, key *ttnpb.APIKey) (*ttnpb.APIKey, error)
+	// Delete api keys deletes all api keys tied to an entity. Used when purging entities.
+	DeleteEntityAPIKeys(ctx context.Context, entityID ttnpb.Identifiers) error
 }
 
 // OAuthStore interface for the OAuth server.
@@ -182,6 +189,7 @@ type ContactInfoStore interface {
 	CreateValidation(ctx context.Context, validation *ttnpb.ContactInfoValidation) (*ttnpb.ContactInfoValidation, error)
 	// Confirm a validation. Only the ID and Token need to be set.
 	Validate(ctx context.Context, validation *ttnpb.ContactInfoValidation) error
+	DeleteEntityContactInfo(ctx context.Context, entityID ttnpb.Identifiers) error
 }
 
 // MigrationStore interface for migration history.
