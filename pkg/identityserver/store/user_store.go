@@ -203,3 +203,8 @@ func (s *userStore) DeleteUser(ctx context.Context, id *ttnpb.UserIdentifiers) (
 	defer trace.StartRegion(ctx, "delete user").End()
 	return s.deleteEntity(ctx, id)
 }
+
+func (s *userStore) PurgeUser(ctx context.Context, id *ttnpb.UserIdentifiers) (err error) {
+	defer trace.StartRegion(ctx, "delete user").End()
+	return s.purgeEntity(ctx, id)
+}
